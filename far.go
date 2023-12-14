@@ -14,7 +14,7 @@ import (
 const (
 	Qwerasd205ClassChangeURL = "https://qwerasd205.github.io/DiscordClassChanges/differences.csv"
 	SyndiShanXClassChangeURL = "https://raw.githubusercontent.com/SyndiShanX/Update-Classes/main/Changes.txt"
-	TargetURL                = "/mnt/f/Documents/BetterDiscord/YoRHA-UI-BetterDiscord/src"
+	TargetURL                = "../YoRHA-UI-BetterDiscord/src"
 	TmpFilename              = "replace.txt"
 )
 
@@ -23,6 +23,8 @@ func main() {
 		os.Remove(TmpFilename)
 		panic(err)
 	}
+
+	fmt.Print("hi")
 
 	f, err := os.Open(TmpFilename)
 	if err != nil {
