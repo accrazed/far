@@ -12,19 +12,19 @@ import (
 )
 
 const (
+	TargetURL = "../YoRHA-UI-BetterDiscord/src" //TODO: CHANGE ME
+
 	Qwerasd205ClassChangeURL = "https://qwerasd205.github.io/DiscordClassChanges/differences.csv"
 	SyndiShanXClassChangeURL = "https://raw.githubusercontent.com/SyndiShanX/Update-Classes/main/Changes.txt"
-	TargetURL                = "../YoRHA-UI-BetterDiscord/src"
+	NyxIsBadClassChangeURL   = "https://raw.githubusercontent.com/NyxIsBad/discordscripts/master/classes_mapping.csv"
 	TmpFilename              = "replace.txt"
 )
 
 func main() {
-	if err := downloadFile(TmpFilename, SyndiShanXClassChangeURL); err != nil {
+	if err := downloadFile(TmpFilename, NyxIsBadClassChangeURL); err != nil {
 		os.Remove(TmpFilename)
 		panic(err)
 	}
-
-	fmt.Print("hi")
 
 	f, err := os.Open(TmpFilename)
 	if err != nil {
@@ -33,7 +33,7 @@ func main() {
 	}
 	defer f.Close()
 
-	if err := SaveSyndiShanX(f); err != nil {
+	if err := SaveNyxIsBad(f); err != nil {
 		panic(err)
 	}
 
@@ -89,7 +89,7 @@ func SaveSyndiShanX(f *os.File) error {
 	return nil
 }
 
-func SaveQwerasd205(f *os.File) {
+func SaveQwerasd205(f *os.File) error {
 	s := bufio.NewScanner(f)
 	legend := make(map[string]string)
 	s.Split(bufio.ScanLines)
@@ -139,6 +139,55 @@ func SaveQwerasd205(f *os.File) {
 	wg.Wait()
 
 	os.Remove(TmpFilename)
+	return nil
+}
+
+func SaveNyxIsBad(f *os.File) error {
+	s := bufio.NewScanner(f)
+	legend := make(map[string]string)
+	s.Split(bufio.ScanLines)
+	for s.Scan() {
+		names := strings.Split(s.Text(), ",")
+		// Set all names in comma list to last name (newest)
+		legend[names[0]] = names[1]
+	}
+
+	var wg sync.WaitGroup
+	filepath.Walk(TargetURL, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return err
+		}
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			dat, err := os.ReadFile(path)
+			if err != nil {
+				panic(err)
+			}
+
+			names := string(dat)
+			for k, v := range legend {
+				names = strings.ReplaceAll(names, k, v)
+			}
+
+			f, err := os.Create(path)
+			if err != nil {
+				panic(err)
+			}
+			defer f.Close()
+			f.WriteString(names)
+
+			fmt.Printf("finished %s\n", path)
+		}()
+
+		return nil
+	})
+
+	wg.Wait()
+
+	os.Remove(TmpFilename)
+	return nil
 }
 
 func downloadFile(filepath string, url string) error {
