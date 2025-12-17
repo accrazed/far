@@ -21,7 +21,7 @@ const (
 )
 
 func main() {
-	if err := downloadFile(TmpFilename, NyxIsBadClassChangeURL); err != nil {
+	if err := downloadFile(TmpFilename, SyndiShanXClassChangeURL); err != nil {
 		os.Remove(TmpFilename)
 		panic(err)
 	}
@@ -33,7 +33,7 @@ func main() {
 	}
 	defer f.Close()
 
-	if err := SaveNyxIsBad(f); err != nil {
+	if err := SaveSyndiShanX(f); err != nil {
 		panic(err)
 	}
 
